@@ -1,0 +1,68 @@
+---
+title: "p8105_hw2_pl2848"
+author: "Pei Liu"
+date: "2022-10-01"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+Problem 1
+
+Read and clean the data; retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
+```{r}
+transit_df = read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
+  janitor::clean_names() 
+
+
+transit_clean = 
+  pivot_longer(
+    transit_df,
+    route1:route11,
+    names_to = "route",
+    names_prefix = "route",
+    values_to = "route_name",
+    values_drop_na = TRUE,
+    values_transform = as.character
+  ) %>% 
+  mutate(entry = as.logical(entry == "YES")) %>% 
+  relocate(route:route_name, .after = division) %>% 
+  relocate(ada, .after = vending) %>% 
+  select(route:ada)
+
+transit_clean
+```
+
+
+How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
+
+Answer: 465
+```{r}
+nrow(distinct(transit_clean, line, station_name))
+```
+
+
+How many stations are ADA compliant?
+
+Answer: 1616
+```{r}
+summary(transit_clean$ada)
+```
+
+
+What proportion of station entrances / exits without vending allow entrance?
+```{r}
+
+```
+
+
+
+
+
+

@@ -134,18 +134,33 @@ use reasonable variable names, omit rows that do not include dumpster-specific d
 mr_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Mr. Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
   janitor::clean_names() %>% 
   drop_na() %>% 
-  mutate(sports_balls = as.integer(round(sports_balls, digits = 0)))
+  mutate(sports_balls = as.integer(round(sports_balls,
+                                         digits = 0)),
+         dumpster = as.numeric(dumpster))
          
 mr_trash_wheel
 ```
-
+Use a similar process to import, clean, and organize the data for Professor Trash Wheel
 ```{r}
 professor_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Professor Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  drop_na() %>% 
+  mutate(sports_balls = as.integer(round(sports_balls,
+                                         digits = 0)),
+         dumpster = as.numeric(dumpster))
+
 professor_trash_wheel
 ```
+add an additional variable to both datasets before combining.
+```{r}
+mr_trash_wheel = mutate(mr_trash_wheel, trash_wheel_name = "Mr. Trash")
+professor_trash_wheel = mutate(professor_trash_wheel, trash_wheel_name = "Professor")
+```
 
-
+combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset
+```{r}
+full_join(mr_trash_wheel, professor_trash_wheel)
+```
 
 
 

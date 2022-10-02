@@ -159,8 +159,32 @@ professor_trash_wheel = mutate(professor_trash_wheel, trash_wheel_name = "Profes
 
 combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset
 ```{r}
-full_join(mr_trash_wheel, professor_trash_wheel)
+combine_trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
+combine_trash_wheel
 ```
 
+Write a paragraph about these data:
+There are 453 × 14
 
+
+
+
+what was the total weight of trash collected by Professor Trash Wheel?
+
+Answer: 135.5 tons
+```{r}
+sum_weight = sum(professor_trash_wheel$weight_tons)
+
+sum_weight
+```
+
+What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
+
+Answer: 856
+
+```{r}
+mr_trash_wheel_2020 = filter(mr_trash_wheel, year == 2020)
+num_sport_balls_2020 =  sum(mr_trash_wheel_2020$sports_balls)
+num_sport_balls_2020
+```
 

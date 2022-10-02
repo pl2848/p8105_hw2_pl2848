@@ -192,8 +192,15 @@ num_sport_balls_2020
 ```{r}
 pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
   janitor::clean_names() %>%
-  separate(mon, into = c("year", "month", "date")) %>% 
-  mutate(month = month.abb[as.numeric(month)])
+  separate(mon, into = c("year", "month", "day")) %>% 
+  mutate(month = month.abb[as.numeric(month)]) %>% 
+  pivot_longer(starts_with("prez"),
+               names_to = "president",
+               names_prefix = "prez_",
+               values_to = "party",
+               values_drop_na = TRUE) %>% 
+  filter(party == 1) %>% 
+  select(-party, -day)
 pols_month
 ```
 

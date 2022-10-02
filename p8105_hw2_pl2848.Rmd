@@ -15,31 +15,42 @@ library(tidyverse)
 
 Problem 1
 
-Read and clean the data; retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
+Read the data and clean column names
 ```{r}
 transit_df = read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
   janitor::clean_names() 
 
+transit_clean
 
+```
+
+Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
+```{r}
 transit_clean = 
   pivot_longer(
     transit_df,
     route1:route11,
-    names_to = "route",
+    names_to = "route_number",
     names_prefix = "route",
     values_to = "route_name",
     values_drop_na = TRUE,
     values_transform = as.character
-  ) %>% 
-  mutate(entry = as.logical(entry == "YES")) %>% 
-  relocate(route:route_name, .after = division) %>% 
+  )%>% 
+   # the pivot longer variable is to tidy the route data to all served routes
+  mutate(entry = as.logical(entry == "YES"),
+         route_served = paste(route_number,route_name,sep="-")) %>% # change the entry variable from character to a logical variable
+  relocate(route_served, .after = station_longitude) %>% 
   relocate(ada, .after = vending) %>% 
-  select(route:ada)
+  relocate(entrance_type, .after = vending) %>% # arrange the order of specific columns according to the requirement on the website
+  select(line:ada,-exit_only) %>% # select the variables we want to retain
+  arrange()
 
 transit_clean
+
 ```
 
 
+# Questions:
 How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
 
 Answer: 465
@@ -50,19 +61,64 @@ nrow(distinct(transit_clean, line, station_name))
 
 How many stations are ADA compliant?
 
-Answer: 1616
+Answer: 84
 ```{r}
-summary(transit_clean$ada)
+unique_station_ada = transit_clean %>% 
+  group_by(line, station_name) %>% 
+  filter(ada == TRUE)
+unique_station_ada
 ```
 
 
 What proportion of station entrances / exits without vending allow entrance?
-```{r}
 
+10.47%
+
+```{r}
+nrow(filter(transit_clean, vending == "NO"))
+
+nrow(transit_clean)
+894/8540
 ```
 
 
+Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
 
+Answer: Number of distinct stations serve the A train is 273. AN 107 of them are ADA complicant.
+
+```{r}
+transit_reformat = 
+  pivot_longer(
+    transit_df,
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name",
+    values_drop_na = TRUE,
+    values_transform = as.character
+  )%>% 
+   # the pivot longer variable is to tidy the route data to all served routes
+  mutate(entry = as.logical(entry == "YES")) %>% # change the entry variable from character to a logical variable
+  relocate(route_number:route_name, .after = station_longitude) %>% 
+  relocate(ada, .after = vending) %>% 
+  relocate(entrance_type, .after = vending) %>% # arrange the order of specific columns according to the requirement on the website
+  select(line:ada,-exit_only) %>% # select the variables we want to retain
+  arrange()
+
+transit_reformat
+```
+```{r}
+num_station_a = transit_reformat %>% 
+  filter(route_name == "A") %>% 
+  nrow()
+
+num_station_a
+
+num_ada_com = transit_reformat %>% 
+  filter(route_name == "A", ada == TRUE) %>% 
+  nrow()
+num_ada_com
+```
 
 
 

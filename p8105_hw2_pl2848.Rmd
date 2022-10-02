@@ -211,8 +211,7 @@ snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>%
   janitor::clean_names() %>% 
   mutate(date = as.Date(as.character(date), format = "%d/%m/%y")) %>% 
   separate(date, into=c("year", "month", "day")) %>% 
-  arrange(year, month) %>% 
-  relocate(year, .before = month)
+  arrange(year, month)
 snp
 ```
 

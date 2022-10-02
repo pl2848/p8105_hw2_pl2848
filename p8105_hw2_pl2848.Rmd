@@ -189,6 +189,7 @@ num_sport_balls_2020
 ```
 
 # Problem 3
+First, clean the data in pols-month.csv. Use separate() to break up the variable mon into integer variables year, month, and day; replace month number with month name; create a president variable taking values gop and dem, and remove prez_dem and prez_gop; and remove the day variable.
 ```{r}
 pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
   janitor::clean_names() %>%
@@ -202,5 +203,13 @@ pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   filter(party == 1) %>% 
   select(-party, -day)
 pols_month
+```
+
+Second, clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
+```{r}
+snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, into=c("month", "day", "year"))
+snp
 ```
 

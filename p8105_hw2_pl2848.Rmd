@@ -164,7 +164,7 @@ combine_trash_wheel
 ```
 
 Write a paragraph about these data:
-There are 453 × 14
+There are 453 rows and 14 columns in mr_trash_wheel
 
 
 
@@ -186,5 +186,14 @@ Answer: 856
 mr_trash_wheel_2020 = filter(mr_trash_wheel, year == 2020)
 num_sport_balls_2020 =  sum(mr_trash_wheel_2020$sports_balls)
 num_sport_balls_2020
+```
+
+# Problem 3
+```{r}
+pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>%
+  separate(mon, into = c("year", "month", "date")) %>% 
+  mutate(month = month.abb[as.numeric(month)])
+pols_month
 ```
 

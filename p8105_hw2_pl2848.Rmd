@@ -209,7 +209,10 @@ Second, clean the data in snp.csv using a similar process to the above. For cons
 ```{r}
 snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
   janitor::clean_names() %>% 
-  separate(date, into=c("month", "day", "year"))
+  mutate(date = as.Date(as.character(date), format = "%d/%m/%y")) %>% 
+  separate(date, into=c("year", "month", "day")) %>% 
+  arrange(year, month) %>% 
+  relocate(year, .before = month)
 snp
 ```
 

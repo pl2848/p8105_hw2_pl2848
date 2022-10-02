@@ -131,11 +131,21 @@ library(readxl)
 
 use reasonable variable names, omit rows that do not include dumpster-specific data, round the number of sports balls to the nearest integer and converts the result to an integer variable (using as.integer)
 ```{r}
-trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Mr. Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
+mr_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Mr. Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
   janitor::clean_names() %>% 
   drop_na() %>% 
   mutate(sports_balls = as.integer(round(sports_balls, digits = 0)))
          
-trash_wheel
+mr_trash_wheel
 ```
+
+```{r}
+professor_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Professor Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
+  janitor::clean_names()
+professor_trash_wheel
+```
+
+
+
+
 

@@ -9,45 +9,30 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Load the libraries we need:
 ```{r}
 library(tidyverse)
+library(readxl)
 ```
 
 Problem 1
 
-Read the data and clean column names
+Read the data and clean column names. Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
 ```{r}
-transit_df = read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
-  janitor::clean_names() 
+transit_df = read_csv(
+  "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+  col_types = cols(Route8 = "c", Route9 = "c", Route10 = "c", Route11 = "c")) %>% 
+  janitor::clean_names() %>% 
+  select(
+    line, station_name, station_latitude, station_longitude, 
+    starts_with("route"), entry, exit_only, vending, entrance_type, 
+    ada) %>% 
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 
-transit_clean
+transit_df
 
 ```
 
-Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
-```{r}
-transit_clean = 
-  pivot_longer(
-    transit_df,
-    route1:route11,
-    names_to = "route_number",
-    names_prefix = "route",
-    values_to = "route_name",
-    values_drop_na = TRUE,
-    values_transform = as.character
-  )%>% 
-   # the pivot longer variable is to tidy the route data to all served routes
-  mutate(entry = as.logical(entry == "YES"),
-         route_served = paste(route_number,route_name,sep="-")) %>% # change the entry variable from character to a logical variable
-  relocate(route_served, .after = station_longitude) %>% 
-  relocate(ada, .after = vending) %>% 
-  relocate(entrance_type, .after = vending) %>% # arrange the order of specific columns according to the requirement on the website
-  select(line:ada,-exit_only) %>% # select the variables we want to retain
-  arrange()
-
-transit_clean
-
-```
 
 
 # Questions:
@@ -55,7 +40,7 @@ How many distinct stations are there? Note that stations are identified both by 
 
 Answer: 465
 ```{r}
-nrow(distinct(transit_clean, line, station_name))
+nrow(distinct(transit_df, line, station_name))
 ```
 
 
@@ -63,49 +48,47 @@ How many stations are ADA compliant?
 
 Answer: 84
 ```{r}
-unique_station_ada = transit_clean %>% 
-  group_by(line, station_name) %>% 
-  filter(ada == TRUE)
+unique_station_ada = transit_df %>% 
+  filter(ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
 unique_station_ada
 ```
 
 
 What proportion of station entrances / exits without vending allow entrance?
 
-10.47%
+37.7%
 
 ```{r}
-nrow(filter(transit_clean, vending == "NO"))
-
-nrow(transit_clean)
-894/8540
+filter(transit_df, vending == "NO") %>% 
+  pull(entry) %>% 
+  mean
 ```
 
 
 Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
 
-Answer: Number of distinct stations serve the A train is 273. AN 107 of them are ADA complicant.
+Answer: Number of distinct stations serve the A train is 60. And 17 of them are ADA complicant.
 
 ```{r}
-transit_reformat = 
+transit_df %>% 
   pivot_longer(
-    transit_df,
     route1:route11,
-    names_to = "route_number",
-    names_prefix = "route",
-    values_to = "route_name",
-    values_drop_na = TRUE,
-    values_transform = as.character
-  )%>% 
-   # the pivot longer variable is to tidy the route data to all served routes
-  mutate(entry = as.logical(entry == "YES")) %>% # change the entry variable from character to a logical variable
-  relocate(route_number:route_name, .after = station_longitude) %>% 
-  relocate(ada, .after = vending) %>% 
-  relocate(entrance_type, .after = vending) %>% # arrange the order of specific columns according to the requirement on the website
-  select(line:ada,-exit_only) %>% # select the variables we want to retain
-  arrange()
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A") %>% 
+  select(station_name, line) %>% 
+  distinct
 
-transit_reformat
+transit_df %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A", ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
 ```
 ```{r}
 num_station_a = transit_reformat %>% 
@@ -125,54 +108,65 @@ num_ada_com
 Read and clean the Mr. Trash Wheel sheet:
 
 specify the sheet in the Excel file and to omit non-data entries (rows with notes / figures; columns containing notes) using arguments in read_excel
-```{r}
-library(readxl)
-```
 
 use reasonable variable names, omit rows that do not include dumpster-specific data, round the number of sports balls to the nearest integer and converts the result to an integer variable (using as.integer)
 ```{r}
-mr_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Mr. Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
+mr_trash_wheel = read_excel("./data/Trash Wheel Collection Data.xlsx", sheet = 1, skip = 1, range = cell_cols("A:N")) %>% 
   janitor::clean_names() %>% 
-  drop_na() %>% 
+  drop_na(dumpster) %>% 
   mutate(sports_balls = as.integer(round(sports_balls,
                                          digits = 0)),
-         dumpster = as.numeric(dumpster))
+         dumpster = as.numeric(dumpster),
+         year = as.numeric(year))
          
 mr_trash_wheel
+
+# Discription: Therea are 547 observations and 14 variables  in mr_trash_wheel dataset. The key variables include: dumpster, month, year, date, weight (tons), column_cubic_yards, and 8 trash types. 
+
+# I read the first sheet, skip first line (it is picture), and select the range of columns I want to read. I then cleaned the names, drop dumpter na, and change the type of dumpster as numeric, and rounded the sport balls variables to nearest in integer.
 ```
 Use a similar process to import, clean, and organize the data for Professor Trash Wheel
 ```{r}
-professor_trash_wheel = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", "Professor Trash Wheel", skip = 1, range = cell_cols("A:N")) %>% 
+professor_trash_wheel = read_excel("./data/Trash Wheel Collection Data.xlsx", sheet = 2, skip = 1, range = cell_cols("A:M")) %>% 
   janitor::clean_names() %>% 
-  drop_na() %>% 
-  mutate(sports_balls = as.integer(round(sports_balls,
-                                         digits = 0)),
-         dumpster = as.numeric(dumpster))
+  drop_na(dumpster) %>% 
+  mutate(dumpster = as.numeric(dumpster))
 
 professor_trash_wheel
+
+# Description: There are 94 observations in total, and 13 variables in the professor_trash_wheel dataset. The key variables include: dumpster, month, year, date, weight (tons), column_cubic_yards, and 7 trash types. 
+
+# I read the second sheet, skip first line (it is picture), and select the range of columns I want to read. I then cleaned the names, drop dumpter na, and change the type of dumpster as numberic. I also changed year to numeric variable.
 ```
 add an additional variable to both datasets before combining.
 ```{r}
 mr_trash_wheel = mutate(mr_trash_wheel, trash_wheel_name = "Mr. Trash")
 professor_trash_wheel = mutate(professor_trash_wheel, trash_wheel_name = "Professor")
+
+# I added one column for each trash wheel dataset, for the convience of joining them.
+
+
 ```
 
 combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset
 ```{r}
 combine_trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
 combine_trash_wheel
+
+# Description of the joined dataset:
+# There are 641 observations and 15 variables in combine_trash_wheel. The key variables include: dumpster, month, year, date, 
 ```
 
-Write a paragraph about these data:
-There are 453 rows and 14 columns in mr_trash_wheel
+
 
 
 
 
 what was the total weight of trash collected by Professor Trash Wheel?
 
-Answer: 135.5 tons
+Answer: 190.12 tons
 ```{r}
+# I sum the weigh_tons of professor trash wheel dataset
 sum_weight = sum(professor_trash_wheel$weight_tons)
 
 sum_weight
@@ -183,6 +177,7 @@ What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
 Answer: 856
 
 ```{r}
+# I first filter the mr_trash_wheel in year 2020, and then sum sports_balls 
 mr_trash_wheel_2020 = filter(mr_trash_wheel, year == 2020)
 num_sport_balls_2020 =  sum(mr_trash_wheel_2020$sports_balls)
 num_sport_balls_2020
@@ -198,22 +193,35 @@ pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   pivot_longer(starts_with("prez"),
                names_to = "president",
                names_prefix = "prez_",
-               values_to = "party",
+               values_to = "party" ,
                values_drop_na = TRUE) %>% 
-  filter(party == 1) %>% 
+  filter(party != 0) %>% 
   select(-party, -day)
 pols_month
 ```
 
 Second, clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
 ```{r}
+library(lubridate)
+```
+
+
+
+```{r}
 snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
-  janitor::clean_names() %>% 
-  mutate(date = as.Date(as.character(date), format = "%d/%m/%y")) %>% 
+  janitor::clean_names()  %>% 
+  mutate(date = mdy(date)) %>% #%>% 
   separate(date, into=c("year", "month", "day")) %>% 
+  mutate(year = ifelse(as.numeric(year) <= 2022,
+                    as.numeric(year),
+                    as.numeric(year)-100))  %>% 
   arrange(year, month)
+
 snp
 ```
+
+
+
 
 Third, tidy the unemployment data so that it can be merged with the previous datasets. This process will involve switching from “wide” to “long” format; ensuring that key variables have the same name; and ensuring that key variables take the same values.
 ```{r}

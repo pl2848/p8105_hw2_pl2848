@@ -189,7 +189,9 @@ First, clean the data in pols-month.csv. Use separate() to break up the variable
 pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
   janitor::clean_names() %>%
   separate(mon, into = c("year", "month", "day")) %>% 
-  mutate(month = month.abb[as.numeric(month)]) %>% 
+  mutate(month = month.abb[as.numeric(month)],
+         year = as.numeric(year),
+         day = as.numeric(day)) %>% 
   pivot_longer(starts_with("prez"),
                names_to = "president",
                names_prefix = "prez_",
@@ -198,6 +200,8 @@ pols_month = read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   filter(party != 0) %>% 
   select(-party, -day)
 pols_month
+
+# This data set has 822 observations, and 9 variables. Year from 1947-2015. It contains year, month and number of national politicians who are democratic or republican at any given time
 ```
 
 Second, clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
@@ -214,10 +218,13 @@ snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>%
   separate(date, into=c("year", "month", "day")) %>% 
   mutate(year = ifelse(as.numeric(year) <= 2022,
                     as.numeric(year),
-                    as.numeric(year)-100))  %>% 
+                    as.numeric(year)-100),
+         month = month.abb[as.numeric(month)])  %>% 
   arrange(year, month)
 
 snp
+
+# This data set has 787 observations and 4 columns. Year from 1950- 2015. It contains variables year, month, day and close. Close means the closing values of the S&P stock index on the associated date.
 ```
 
 
@@ -227,11 +234,25 @@ Third, tidy the unemployment data so that it can be merged with the previous dat
 ```{r}
 unemployment = read_csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
   janitor::clean_names() %>% 
+  drop_na() %>% 
   pivot_longer(jan:dec,
                names_to = "month",
                values_to = "unemployment_rate",
-               values_drop_na = TRUE)
+               values_drop_na = TRUE) %>% 
+  mutate(month = str_to_title(month))
 
 unemployment
+
+# This dataset has 810 observations and 3 variables.Year from 1948-2015. The key variables are year, month and unemployment_rate. It is mainly about the unemployment rate
+```
+
+
+Join the datasets by merging snp into pols, and merging unemployment into the result.
+```{r}
+join_pols_snp = right_join(pols_month, snp) 
+join_final = merge(join_p3,unemployment)
+join_final
+
+# This dataset has 780 observations and 12 columns. Year from 1950-2015. The key variables includes year, president, close, unemployment_rate. This table merges information from pols_months, snp and unemployment.
 ```
 

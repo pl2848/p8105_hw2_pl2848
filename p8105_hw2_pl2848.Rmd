@@ -5,10 +5,6 @@ date: "2022-10-01"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 Load the libraries we need:
 ```{r}
 library(tidyverse)
@@ -154,7 +150,8 @@ combine_trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
 combine_trash_wheel
 
 # Description of the joined dataset:
-# There are 641 observations and 15 variables in combine_trash_wheel. The key variables include: dumpster, month, year, date, 
+# There are 641 observations and 15 variables in combine_trash_wheel. The key variables include: dumpster, month, year, date, and many trash types.
+# I joined the dataset by full_join.
 ```
 
 

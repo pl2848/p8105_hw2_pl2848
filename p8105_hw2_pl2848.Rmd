@@ -31,7 +31,7 @@ head(transit_df)
 
 
 
-# Questions:
+## Questions:
 1. How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
 
 Answer: 465
@@ -148,7 +148,7 @@ head(combine_trash_wheel)
 
 
 
-# Question
+## Question
 1. what was the total weight of trash collected by Professor Trash Wheel?
 
 Answer: 190.12 tons

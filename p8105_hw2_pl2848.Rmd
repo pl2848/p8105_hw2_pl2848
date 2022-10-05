@@ -1,6 +1,6 @@
 ---
 title: "p8105_hw2_pl2848"
-author: "Pei Liu"
+author: "Pei Liu (pl2848)"
 date: "2022-10-01"
 output: github_document
 ---
@@ -11,7 +11,7 @@ library(tidyverse)
 library(readxl)
 ```
 
-Problem 1
+# Problem 1
 
 Read the data and clean column names. Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (the ifelse or recode function may be useful).
 ```{r}
@@ -32,7 +32,7 @@ transit_df
 
 
 # Questions:
-How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
+1. How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
 
 Answer: 465
 ```{r}
@@ -40,7 +40,7 @@ nrow(distinct(transit_df, line, station_name))
 ```
 
 
-How many stations are ADA compliant?
+2. How many stations are ADA compliant?
 
 Answer: 84
 ```{r}
@@ -52,7 +52,7 @@ unique_station_ada
 ```
 
 
-What proportion of station entrances / exits without vending allow entrance?
+3. What proportion of station entrances / exits without vending allow entrance?
 
 37.7%
 
@@ -63,7 +63,7 @@ filter(transit_df, vending == "NO") %>%
 ```
 
 
-Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
+4. Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
 
 Answer: Number of distinct stations serve the A train is 60. And 17 of them are ADA complicant.
 
@@ -108,7 +108,7 @@ mr_trash_wheel
 
 # Discription: Therea are 547 observations and 14 variables  in mr_trash_wheel dataset. The key variables include: dumpster, month, year, date, weight (tons), column_cubic_yards, and 8 trash types. 
 
-# I read the first sheet, skip first line (it is picture), and select the range of columns I want to read. I then cleaned the names, drop dumpter na, and change the type of dumpster as numeric, and rounded the sport balls variables to nearest in integer.
+# I read the first sheet, skip first line (it is picture), secify the sheet I want to read and select the range of columns I want to read. I then cleaned the names, drop dumpter na, and change the type of dumpster as numeric, and rounded the sport balls variables to nearest in integer.
 ```
 Use a similar process to import, clean, and organize the data for Professor Trash Wheel
 ```{r}
@@ -147,8 +147,8 @@ combine_trash_wheel
 
 
 
-
-what was the total weight of trash collected by Professor Trash Wheel?
+# Question
+1. what was the total weight of trash collected by Professor Trash Wheel?
 
 Answer: 190.12 tons
 ```{r}
@@ -158,7 +158,7 @@ sum_weight = sum(professor_trash_wheel$weight_tons)
 sum_weight
 ```
 
-What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
+2. What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
 
 Answer: 856
 
@@ -191,8 +191,10 @@ pols_month
 ```
 
 Second, clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
+
 ```{r}
 library(lubridate)
+# I loaded the lubridate library to help me tidy the date
 ```
 
 
@@ -211,6 +213,7 @@ snp = read_csv("./data/fivethirtyeight_datasets/snp.csv") %>%
 snp
 
 # This data set has 787 observations and 4 columns. Year from 1950- 2015. It contains variables year, month, day and close. Close means the closing values of the S&P stock index on the associated date.
+
 ```
 
 

@@ -86,18 +86,7 @@ transit_df %>%
   select(station_name, line) %>% 
   distinct
 ```
-```{r}
-num_station_a = transit_reformat %>% 
-  filter(route_name == "A") %>% 
-  nrow()
 
-num_station_a
-
-num_ada_com = transit_reformat %>% 
-  filter(route_name == "A", ada == TRUE) %>% 
-  nrow()
-num_ada_com
-```
 
 
 # Problem 2
@@ -247,7 +236,7 @@ unemployment
 Join the datasets by merging snp into pols, and merging unemployment into the result.
 ```{r}
 join_pols_snp = right_join(pols_month, snp) 
-join_final = merge(join_p3,unemployment)
+join_final = merge(join_pols_snp,unemployment)
 join_final
 
 # This dataset has 780 observations and 12 columns. Year from 1950-2015. The key variables includes year, president, close, unemployment_rate. This table merges information from pols_months, snp and unemployment.
